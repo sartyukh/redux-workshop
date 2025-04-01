@@ -1,0 +1,57 @@
+/* Основные стили для компонента */
+.error-page-container {
+  display: flex;
+  height: 100dvh;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.error-page-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
+}
+
+.error-display-container {
+  z-index: 10;
+  width: 100%;
+  max-width: 503px;
+}
+
+.error-image-container {
+  z-index: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 80vh;
+}
+
+/* Медиа-запрос для планшетов и выше */
+@media (min-width: 768px) {
+  .error-page-content {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+    justify-items: start;
+    column-gap: 1.25rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .error-display-container {
+    grid-column: span 5 / span 5;
+  }
+
+  .error-image-container {
+    grid-column: span 7 / span 7;
+  }
+}
+
+/* Медиа-запрос для десктопов */
+@media (min-width: 1024px) {
+  .error-display-container {
+    justify-self: center;
+  }
+}
