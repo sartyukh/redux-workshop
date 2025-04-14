@@ -1,41 +1,49 @@
 import React, { useState } from 'react';
 import { TodoItem } from '@/components/todo-item/todo-item';
-import { useTodos, useCreateTodo, useUpdateTodoStatus, useDeleteTodo, useDeleteCompletedTodos } from '@/api/todo.hooks';
 import { TodoDTO } from '@/api/types/todo.dto';
+import {
+  useGetTodosQuery,
+  useCreateTodoMutation,
+  useUpdateTodoStatusMutation,
+  useDeleteTodoMutation,
+  useDeleteCompletedTodosMutation,
+} from '@/api/todo.api';
 import './styles.css';
 
 export const HomePage: React.FC = () => {
   const [newTodoTitle, setNewTodoTitle] = useState('');
   
-  const { data: todos = [], isLoading, error, isFetching } = useTodos();
-  const createTodo = useCreateTodo();
-  const updateTodo = useUpdateTodoStatus();
-  const deleteTodo = useDeleteTodo();
-  const deleteCompletedTodos = useDeleteCompletedTodos();
+  const { data: todos = [], isLoading, error } = useGetTodosQuery();
+  const [createTodo, { isLoading: isCreating }] = useCreateTodoMutation();
+  const [updateTodoStatus] = useUpdateTodoStatusMutation();
+  const [deleteTodo] = useDeleteTodoMutation();
+  const [deleteCompletedTodos, { isLoading: isDeletingCompleted }] = useDeleteCompletedTodosMutation();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newTodoTitle.trim()) {
-      createTodo.mutate(newTodoTitle.trim());
+      createTodo(newTodoTitle.trim());
       setNewTodoTitle('');
     }
   };
   
   const handleToggleComplete = (id: string, completed: boolean) => {
-    updateTodo.mutate({ id, completed });
+    updateTodoStatus({ id, completed });
   };
   
   const handleDelete = (id: string) => {
-    deleteTodo.mutate(id);
+    deleteTodo(id);
   };
 
   const handleDeleteCompleted = () => {
-    deleteCompletedTodos.mutate();
+    deleteCompletedTodos();
   };
   
+  // Группируем задачи по статусу
   const completedTodos = todos.filter((todo: TodoDTO) => todo.completed);
   const activeTodos = todos.filter((todo: TodoDTO) => !todo.completed);
   
+  // Вычисляем статистику
   const totalTodos = todos.length;
   const completedCount = completedTodos.length;
   const activeCount = activeTodos.length;
@@ -45,7 +53,7 @@ export const HomePage: React.FC = () => {
   }
   
   if (error) {
-    return <div className="error">Ошибка: {error.message}</div>;
+    return <div className="error">Ошибка: {'error' in error ? error.error : 'Неизвестная ошибка'}</div>;
   }
   
   return (
@@ -58,10 +66,10 @@ export const HomePage: React.FC = () => {
           value={newTodoTitle}
           onChange={(e) => setNewTodoTitle(e.target.value)}
           placeholder="Добавить новую задачу..."
-          disabled={createTodo.isPending}
+          disabled={isCreating}
         />
-        <button type="submit" disabled={createTodo.isPending}>
-          {createTodo.isPending ? 'Добавление...' : 'Добавить'}
+        <button type="submit" disabled={isCreating}>
+          {isCreating ? 'Добавление...' : 'Добавить'}
         </button>
       </form>
       
@@ -72,29 +80,23 @@ export const HomePage: React.FC = () => {
         {completedCount > 0 && (
           <button 
             onClick={handleDeleteCompleted}
-            disabled={deleteCompletedTodos.isPending}
+            disabled={isDeletingCompleted}
           >
-            {deleteCompletedTodos.isPending ? 'Удаление...' : 'Удалить завершенные'}
+            {isDeletingCompleted ? 'Удаление...' : 'Удалить завершенные'}
           </button>
         )}
       </div>
       
-      
       <div className="todo-list">
-        <div>
-          <div className="todo-list_header">
-            <h2>Активные задачи</h2>
-            {isFetching && <p>Загрузка...</p>}
-          </div>
+        <h2>Активные задачи</h2>
         {activeTodos.map((todo: TodoDTO) => (
-            <TodoItem 
-              key={todo.id} 
-              todoData={todo}
-              onToggleComplete={handleToggleComplete}
-              onDelete={handleDelete}
+          <TodoItem 
+            key={todo.id} 
+            todoData={todo}
+            onToggleComplete={handleToggleComplete}
+            onDelete={handleDelete}
           />
         ))}
-        </div>
         
         <h2>Завершенные задачи</h2>
         {completedTodos.map((todo: TodoDTO) => (
