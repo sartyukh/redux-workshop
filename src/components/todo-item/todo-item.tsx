@@ -1,43 +1,31 @@
-import React, { useState, useMemo } from 'react';
-import { Todo, TodoDTO } from '../../store/types/todo.types';
-import { useAppDispatch } from '@/store/hooks';
-import { updateTodoStatus } from '@/store/features/todo/todo-actions';
+import React, { useState } from 'react';
+import { TodoDTO } from '@/api/types/todo.dto';
 import './styles.css';
 
 interface TodoItemProps {
   todoData: TodoDTO;
+  onToggleComplete: (id: string, completed: boolean) => void;
   onDelete: (id: string) => void;
 }
 
-export const TodoItem: React.FC<TodoItemProps> = ({ todoData, onDelete }) => {
-  const dispatch = useAppDispatch();
+export const TodoItem: React.FC<TodoItemProps> = ({ 
+  todoData, 
+  onToggleComplete, 
+  onDelete 
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(todoData.title);
   
-  // Создаем объект Todo из DTO для использования методов класса
-  const todo = useMemo(() => new Todo(todoData), [todoData]);
-  
   const handleToggleStatus = () => {
-    // Изменяем статус, используя модель Todo
-    const updatedTodo = todo.clone();
-    updatedTodo.toggle();
-    
-    dispatch(updateTodoStatus({ 
-      id: todo.id, 
-      completed: updatedTodo.completed 
-    }));
+    onToggleComplete(todoData.id, !todoData.completed);
   };
   
-  // Используем методы модели Todo
-  const formattedDate = todo.formatCreatedDate();
-  
-  // Определим, просрочена ли задача (если она создана более 7 дней назад)
-  const overdue = todo.isOverdue(
-    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  );
+  const handleDelete = () => {
+    onDelete(todoData.id);
+  };
   
   return (
-    <div className={`todo-item ${todoData.completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}`}>
+    <div className={`todo-item ${todoData.completed ? 'completed' : ''}`}>
       <input
         type="checkbox"
         checked={todoData.completed}
@@ -63,13 +51,13 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todoData, onDelete }) => {
         )}
         
         <span className="todo-date">
-          Создано: {formattedDate}
+          Создано: {new Date(todoData.createdAt).toLocaleDateString()}
         </span>
       </div>
       
       <button 
         className="delete-btn"
-        onClick={() => onDelete(todoData.id)}
+        onClick={handleDelete}
       >
         Удалить
       </button>

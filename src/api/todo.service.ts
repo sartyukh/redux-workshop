@@ -25,6 +25,12 @@ export class TodoService {
       throw error;
     }
   }
+
+  async getById(id: string): Promise<Todo> {
+    const response = await fetch(`${this.baseUrl}/${id}`);
+    const data: TodoDTO = await response.json();
+    return Todo.fromDTO(data);
+  }
   
   async createTodo(todo: Todo): Promise<Todo> {
     try {
@@ -42,7 +48,6 @@ export class TodoService {
       
       const data: TodoDTO = await response.json();
       
-      // Возвращаем новый объект Todo, созданный из DTO
       return Todo.fromDTO(data);
     } catch (error) {
       console.error('Ошибка при создании задачи:', error);
@@ -66,7 +71,6 @@ export class TodoService {
       
       const data: TodoDTO = await response.json();
       
-      // Возвращаем обновленный объект Todo
       return Todo.fromDTO(data);
     } catch (error) {
       console.error('Ошибка при обновлении задачи:', error);

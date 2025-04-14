@@ -104,6 +104,12 @@ body {
   margin-top: 20px;
 }
 
+.todo-list_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .empty-list {
   text-align: center;
   color: var(--medium-gray);
