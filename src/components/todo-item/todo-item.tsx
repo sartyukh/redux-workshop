@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TodoDTO } from '@/api/types/todo.dto';
+import { Todo } from '@/store/types/todo.types';
 import './styles.css';
 
 interface TodoItemProps {
-  todoData: TodoDTO;
+  todoData: Todo;
   onToggleComplete: (id: string, completed: boolean) => void;
   onDelete: (id: string) => void;
 }
