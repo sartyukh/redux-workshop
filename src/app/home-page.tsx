@@ -39,11 +39,9 @@ export const HomePage: React.FC = () => {
     deleteCompletedTodos();
   };
   
-  // Группируем задачи по статусу
   const completedTodos = todos.filter((todo: TodoDTO) => todo.completed);
   const activeTodos = todos.filter((todo: TodoDTO) => !todo.completed);
   
-  // Вычисляем статистику
   const totalTodos = todos.length;
   const completedCount = completedTodos.length;
   const activeCount = activeTodos.length;

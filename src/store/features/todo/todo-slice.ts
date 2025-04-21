@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 import { TodoDTO, TodosState } from '@/store/types/todo.types';
 import { RootState } from '@/store/redux';
-import { addNewTodo, fetchTodos, updateTodoStatus } from './todo-actions';
+import { todoApi } from '@/api/todo.api';
 
 export const todosAdapter = createEntityAdapter<TodoDTO, string>({
   selectId: (todo) => todo.id,
@@ -48,23 +48,23 @@ const todosSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTodos.pending, (state) => {
+      .addMatcher(todoApi.endpoints.getTodos.matchPending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
+      .addMatcher(todoApi.endpoints.getTodos.matchFulfilled, (state, action) => {
         state.loading = false;
         // action.payload теперь содержит массив TodoDTO
         todosAdapter.setAll(state, action.payload);
       })
-      .addCase(fetchTodos.rejected, (state, action) => {
+      .addMatcher(todoApi.endpoints.getTodos.matchRejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Произошла ошибка';
       })
-      .addCase(addNewTodo.fulfilled, (state, action) => {
+      .addMatcher(todoApi.endpoints.createTodo.matchFulfilled, (state, action) => {
         todosAdapter.addOne(state, action.payload);
       })
-      .addCase(updateTodoStatus.fulfilled, (state, action) => {
+      .addMatcher(todoApi.endpoints.updateTodoStatus.matchFulfilled, (state, action) => {
         todosAdapter.updateOne(state, {
           id: action.payload.id,
           changes: action.payload
